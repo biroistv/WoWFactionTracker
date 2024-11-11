@@ -5,4 +5,9 @@
 ## Version: 1.0.0
 ## SavedVariables: PriestFactionTrackerDB
 
+
+### Core and Utilities
+libs\PriestFactionGUI.lua
+
+# Main
 PriestFactionTracker.lua
