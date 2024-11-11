@@ -5,7 +5,7 @@ WoWFactionTracker.PRST_FactionGUI = {}
 local PriestFactionGUI = WoWFactionTracker.PRST_FactionGUI
 
 -- GUI Pool to store and reuse frames and buttons
-PriestFactionGUI.pool = {frames = {}, buttons = {}, labels = {}}
+PriestFactionGUI.pool = { frames = {}, buttons = {}, labels = {}, progressBars = {} }
 
 -- Helper function to apply custom backdrop styling
 local function ApplyBackdrop(frame, bgFile, edgeFile, bgColor, edgeColor, tileSize, edgeSize)
@@ -182,7 +182,7 @@ function PriestFactionGUI:CreateFrame(
         frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         frame.title:SetPoint("TOP", frame, "TOP", 0, -10)
     end
-    frame.title:SetText(title or "Untitled Frame")
+    frame.title:SetText(title)
     frame.title:SetFont("Fonts\\FRIZQT__.TTF", titleFontSize or 12)
 
     -- Enable dragging if specified
@@ -294,6 +294,104 @@ function PriestFactionGUI:CreateLabel(parent, text, fontSize, posX, posY)
     return label
 end
 
+-- Function to create a progress bar with a border around it
+function PriestFactionGUI:CreateProgressBar(parent, width, height, bgColor, fillColor)
+    -- Create the outer frame to act as the border container
+    local outerFrame = table.remove(self.pool.progressBars)  -- Try to reuse from pool
+    if not outerFrame then
+        outerFrame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+    end
+
+    -- Configure outer frame as the border container
+    outerFrame:SetSize(width + 4, height + 4)  -- Add 2 pixels for the border on each side
+    outerFrame:SetPoint("TOP", parent, "TOP", 0, -40)  -- Adjust position as needed
+    outerFrame:SetBackdrop({
+        bgFile = "Interface\\Buttons\\WHITE8X8",
+        edgeFile = "Interface\\Buttons\\WHITE8X8",
+        tile = false,
+        tileSize = 0,
+        edgeSize = 2,  -- Border thickness
+        insets = { left = 2, right = 2, top = 2, bottom = 2 }
+    })
+    outerFrame:SetBackdropColor(bgColor.r or 0, bgColor.g or 0, bgColor.b or 0, bgColor.a or 1)
+    outerFrame:SetBackdropBorderColor(0, 0, 0, 1)  -- Black border color
+
+    -- Create the inner progress bar (StatusBar) inside the outer frame
+    local progressBar = outerFrame.progressBar or CreateFrame("StatusBar", nil, outerFrame)
+    progressBar:SetSize(width, height)
+    progressBar:SetPoint("CENTER", outerFrame, "CENTER", 0, 0)
+    progressBar:SetMinMaxValues(0, 100)
+    progressBar:SetValue(0)  -- Initial progress
+
+    -- Set the fill texture and color
+    progressBar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+    progressBar:GetStatusBarTexture():SetHorizTile(false)
+    progressBar:SetStatusBarColor(fillColor.r or 0, fillColor.g or 1, fillColor.b or 0, fillColor.a or 1)
+
+    outerFrame.progressBar = progressBar  -- Store reference to the inner progress bar
+    outerFrame:Show()
+
+    -- Adding update function for setting progress on the outer frame, operating on the inner progress bar
+    function outerFrame:SetProgress(value)
+        value = math.min(math.max(value, 0), 100)  -- Clamp value between 0 and 100
+        progressBar:SetValue(value)
+    end
+
+    return outerFrame
+end
+
+-- Function to create a faction progress display
+function PriestFactionGUI:CreateFactionProgressFrame(parent, iconPath, factionName, progress, maxProgress)
+    -- Create the main container frame
+    local frame = self:CreateFrame(nil, 400, 40, nil, false, "Interface\\Buttons\\WHITE8X8", " ", {r=0, g=0, b=0, a=0.2})
+    frame:SetPoint("CENTER", parent, "CENTER")
+
+     -- Create the icon border
+     local iconBorder = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+     iconBorder:SetSize(26, 26)  -- 2 pixels larger than the icon (40 + 2*2)
+     iconBorder:SetPoint("LEFT", frame, "LEFT", 10, 0)
+     iconBorder:SetBackdrop({
+         bgFile = "Interface\\Buttons\\WHITE8X8",  -- Solid color background for the border
+         edgeFile = "Interface\\Buttons\\WHITE8X8",  -- Solid color edge
+         tile = false,
+         tileSize = 0,
+         edgeSize = 2,
+         insets = { left = 2, right = 2, top = 2, bottom = 2 }
+     })
+     iconBorder:SetBackdropColor(0, 0, 0, 1)  -- Solid black color for the border
+     iconBorder:SetBackdropBorderColor(0, 0, 0, 1)  -- Solid black border edge color
+
+     -- Create the icon inside the border
+     local icon = iconBorder:CreateTexture(nil, "ARTWORK")
+     icon:SetSize(24, 24)
+     icon:SetPoint("CENTER", iconBorder, "CENTER", 0, 0)
+     icon:SetTexture(iconPath or "Interface\\Icons\\INV_Misc_QuestionMark")  -- Default icon if none provided
+     icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)  -- Crop edges for cleaner appearance
+
+    -- Create the faction name label
+    local nameLabel = self:CreateLabel(frame, factionName or "Faction Name", 10, 60, 10)
+    nameLabel:SetFont("Fonts\\FRIZQT__.TTF", 10)
+    nameLabel:SetPoint("TOPLEFT", icon, "TOPRIGHT", 10, 0)
+
+    -- Create the progress bar
+    local progressBar = self:CreateProgressBar(frame, 260, 8, { r = 0.2, g = 0.2, b = 0.2, a = 1 }, { r = 0.1, g = 0.6, b = 1, a = 1 })
+    progressBar:SetPoint("TOPLEFT", icon, "TOPRIGHT", 10, -16)
+    progressBar:SetProgress(math.floor((progress / maxProgress) * 100))  -- Set initial progress
+
+    -- Create the status text
+    local statusText = self:CreateLabel(frame, string.format("%d/%d", progress, maxProgress), 14, 60, -20)
+    statusText:SetFont("Fonts\\FRIZQT__.TTF", 10)
+    statusText:SetPoint("TOPLEFT", icon, "TOPRIGHT", 100, 0)
+
+    -- Update function for progress values
+    function frame:SetProgress(current, maximum)
+        progressBar:SetProgress(math.floor((current / maximum) * 100))
+        statusText:SetText(string.format("%d/%d", current, maximum))
+    end
+
+    return frame
+end
+
 -- Method to release a frame back to the pool
 function PriestFactionGUI:ReleaseFrame(frame)
     frame:Hide()
@@ -314,6 +412,13 @@ function PriestFactionGUI:ReleaseLabel(label)
     label:Hide()
     label:SetText("")
     table.insert(self.pool.labels, label)
+end
+
+-- Method to release a progress bar back to the pool
+function PriestFactionGUI:ReleaseProgressBar(progressBar)
+    progressBar:Hide()
+    progressBar:SetValue(0)  -- Reset to 0
+    table.insert(self.pool.progressBars, progressBar)
 end
 
 return PriestFactionGUI
