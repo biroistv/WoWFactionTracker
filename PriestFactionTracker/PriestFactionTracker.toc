@@ -1,0 +1,8 @@
+## Interface: 100002
+## Title: Priest Faction Tracker
+## Notes: Tracks reputation progress for various factions in WoW.
+## Author: Biró István
+## Version: 1.0.0
+## SavedVariables: PriestFactionTrackerDB
+
+PriestFactionTracker.lua
