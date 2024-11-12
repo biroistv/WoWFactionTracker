@@ -51,7 +51,7 @@ end
 
 -- Function to create a collapsible section in the red frame
 local function CreateCollapsibleSection(parent, sectionData, allSections)
-    -- Create header button
+    -- Create header button with collapsible indicator
     local headerButton =
         PriestFactionGUI:CreateStylizedButton(
         parent,
@@ -59,11 +59,18 @@ local function CreateCollapsibleSection(parent, sectionData, allSections)
         20,
         sectionData.header,
         {r = 0, g = 0, b = 0, a = 0},
-        {r = 92 / 255, g = 92 / 255, b = 92 / 255, a = 1}
+        {r = 92 / 255, g = 92 / 255, b = 92 / 255, a = 1},
+        "Fonts\\FRIZQT__.TTF",
+        13
     )
     headerButton:GetFontString():SetJustifyH("LEFT")
     headerButton:GetFontString():SetTextColor(1, 0.8, 0) -- Gold color for header
-    headerButton.isExpanded = true -- Initial state as collapsed
+    headerButton.isExpanded = true -- Initial state as expanded
+
+    -- Create collapsible indicator "+" (collapsed) or "-" (expanded)
+    local collapseIndicator = headerButton:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    collapseIndicator:SetPoint("RIGHT", headerButton, "RIGHT", -10, 0)
+    collapseIndicator:SetText(headerButton.isExpanded and "-" or "+") -- Set initial state to "-"
 
     -- Create option buttons under this header (hidden initially)
     local optionButtons = {}
@@ -90,11 +97,12 @@ local function CreateCollapsibleSection(parent, sectionData, allSections)
         )
     end
 
-    -- Toggle button visibility when header is clicked and update layout
+    -- Toggle button visibility and update layout when header is clicked
     headerButton:SetScript(
         "OnClick",
         function()
             headerButton.isExpanded = not headerButton.isExpanded
+            collapseIndicator:SetText(headerButton.isExpanded and "-" or "+") -- Toggle between "+" and "-"
             UpdateSectionLayout(parent, allSections) -- Recalculate layout
         end
     )
