@@ -1,9 +1,12 @@
 -- Initialize addon namespace
+-- =============================================================================
 local addonName, WoWFactionTracker = ...
 
-local PriestFactionGUI = WoWFactionTracker.PRST_FactionGUI
+local PriestFactionGUI                = WoWFactionTracker.PRST_FactionGUI
+local PriestFactionTrackerSettingsGUI = WoWFactionTracker.PRST_FactionTrackerSettings
 
--- Main function to run when the addon is loaded
+-- Function to be called when the addon is loaded
+-- =============================================================================
 local function OnLoad()
     print(addonName .. " loaded successfully!")
 
@@ -54,11 +57,15 @@ local function OnLoad()
     )
 end
 
+-- Register slash command to open the settings window
+-- =============================================================================
+SLASH_PFT1 = "/PFT"
+SlashCmdList["PFT"] = PriestFactionTrackerSettingsGUI.ToggleFactionTrackerSettingsWindow
+
 -- Event listener for addon loading
+-- =============================================================================
 local frame = CreateFrame("Frame")
-
 frame:RegisterEvent("ADDON_LOADED")
-
 frame:SetScript(
     "OnEvent",
     function(_, event, name)

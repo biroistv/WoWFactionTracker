@@ -8,6 +8,8 @@
 
 ### Core and Utilities
 libs\PriestFactionGUI.lua
+libs\PriestFactionTrackerSettings.lua
+
 
 # Main
 PriestFactionTracker.lua

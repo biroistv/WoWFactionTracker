@@ -17,6 +17,7 @@
     "Lua.diagnostics.globals": [
         "ObjectiveTrackerFrame",
         "GetExpansionName",
-        "PlayerFrame"
+        "PlayerFrame",
+        "SlashCmdList"
     ]
 }
