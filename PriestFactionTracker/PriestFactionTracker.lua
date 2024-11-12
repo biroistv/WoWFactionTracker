@@ -14,7 +14,7 @@ local function OnLoad()
         "MainTrackerFrame",
         400,
         300,
-        "Faction Tracker",
+        " ",
         true,
         true,
         "Interface\\Buttons\\WHITE8X8",
@@ -40,6 +40,15 @@ local function OnLoad()
         mainFrame, -- Parent frame
         "Interface\\Icons\\INV_Misc_Head_Human_01", -- Icon path
         "Example Faction 2", -- Faction name
+        1500, -- Current progress
+        2000 -- Max progress
+    )
+
+    local factionFrame3 =
+        PriestFactionGUI:CreateFactionProgressFrame(
+        mainFrame, -- Parent frame
+        "Interface\\Icons\\INV_Misc_Head_Human_01", -- Icon path
+        "Example Faction 3", -- Faction name
         1500, -- Current progress
         2000 -- Max progress
     )

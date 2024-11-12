@@ -4,9 +4,11 @@ local _, WoWFactionTracker = ...
 WoWFactionTracker.PRST_FactionGUI = {}
 local PriestFactionGUI = WoWFactionTracker.PRST_FactionGUI
 
+-- Constants for GUI element types
+local UNIQUE_FRAME_ID = 0 -- Initialize a global identifier counter
+
 -- GUI Pool to store and reuse frames and buttons
 PriestFactionGUI.pool = {frames = {}, buttons = {}, labels = {}, progressBars = {}}
-
 
 --- Applies a backdrop style to a frame.
 -- @param frame The frame to style
@@ -138,6 +140,23 @@ function PriestFactionGUI:CreateFrame(
                 end
             else
                 print("Warning: Skipping child; it does not have a GetWidth method or is nil.")
+            end
+        end
+    end
+
+    -- Function to reorganize child frames vertically with padding
+    function frame.ReorganizeChildFrames(verticalPadding)
+        verticalPadding = verticalPadding or 5
+        local childFrames = frame.childFrames or {}
+
+        for index, child in ipairs(childFrames) do
+            child:ClearAllPoints() -- Clear existing position
+
+            if index == 1 then
+                child:SetPoint("TOP", frame, "TOP", 0, -verticalPadding)
+            else
+                local previousFrame = childFrames[index - 1]
+                child:SetPoint("TOP", previousFrame, "BOTTOM", 0, -verticalPadding)
             end
         end
     end
@@ -328,7 +347,7 @@ function PriestFactionGUI:CreateFactionProgressFrame(parent, iconPath, factionNa
         parent,
         "",
         400,
-        40,
+        34,
         " ",
         "Interface\\Buttons\\WHITE8X8",
         "Interface\\Buttons\\WHITE8X8",
@@ -339,18 +358,20 @@ function PriestFactionGUI:CreateFactionProgressFrame(parent, iconPath, factionNa
         2
     )
 
-     -- Determine the position of the new child frame
-     if #parent.childFrames == 0 then
-         -- First child: position it at the top
-         frame:SetPoint("TOP", parent, "TOP", 0, -5)
-     else
-         -- Subsequent child: position it below the last child
-         local lastChild = parent.childFrames[#parent.childFrames]
-         frame:SetPoint("TOP", lastChild, "BOTTOM", 0, -5)
-     end
+    -- Determine the position of the new child frame
+    if #parent.childFrames == 0 then
+        -- First child: position it at the top
+        frame:SetPoint("TOP", parent, "TOP", 0, -5)
+    else
+        -- Subsequent child: position it below the last child
+        local lastChild = parent.childFrames[#parent.childFrames]
+        frame:SetPoint("TOP", lastChild, "BOTTOM", 0, -5)
+    end
+
     -- Add the new child frame to the list
     table.insert(parent.childFrames, frame)
     frame.Type = "FactionProgressFrame"
+    frame.FrameID = "FactionProgressFrame" .. UNIQUE_FRAME_ID
 
     -- Create the icon border
     local iconBorder = CreateFrame("Frame", nil, frame, "BackdropTemplate")
@@ -403,6 +424,36 @@ function PriestFactionGUI:CreateFactionProgressFrame(parent, iconPath, factionNa
     table.insert(parent.childFrames, frame)
 
     return frame
+end
+
+--- Removes a faction progress frame from the parent frame and reorganizes remaining frames.
+-- @param parent Frame The parent frame
+-- @param frameId String The unique identifier of the frame to be removed
+function PriestFactionGUI:RemoveFactionProgressFrame(parent, frameId)
+    local childFrames = parent.childFrames or {}
+    local indexToRemove = nil
+
+    -- Find the index of the frame to remove
+    for index, frame in ipairs(childFrames) do
+        if frame.frameId == frameId then
+            indexToRemove = index
+            break
+        end
+    end
+
+    -- If frame found, remove it and reorganize remaining frames
+    if indexToRemove then
+        -- Remove frame from display and release resources
+        local frameToRemove = table.remove(childFrames, indexToRemove)
+        frameToRemove:Hide() -- Hide frame
+        frameToRemove:SetParent(nil) -- Detach from parent
+        frameToRemove = nil -- Allow garbage collection
+
+        -- Reorganize remaining frames
+        parent.ReorganizeChildFrames(5)
+    else
+        print("Error: FactionProgressFrame with ID " .. frameId .. " not found.")
+    end
 end
 
 -- Method to release a frame back to the pool
