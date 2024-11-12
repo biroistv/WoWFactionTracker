@@ -7,7 +7,13 @@ local PriestFactionGUI = WoWFactionTracker.PRST_FactionGUI
 -- GUI Pool to store and reuse frames and buttons
 PriestFactionGUI.pool = { frames = {}, buttons = {}, labels = {}, progressBars = {} }
 
--- Helper function to apply custom backdrop styling
+
+--- Applies a backdrop style to a frame.
+-- @param frame The frame to style
+-- @param bgFile Background texture file path
+-- @param edgeFile Edge texture file path
+-- @param bgColor Table with RGBA values for background color
+-- @param edgeColor Table with RGBA values for edge color
 local function ApplyBackdrop(frame, bgFile, edgeFile, bgColor, edgeColor, tileSize, edgeSize)
     frame:SetBackdrop(
         {
@@ -23,7 +29,19 @@ local function ApplyBackdrop(frame, bgFile, edgeFile, bgColor, edgeColor, tileSi
     frame:SetBackdropBorderColor(edgeColor.r or 1, edgeColor.g or 1, edgeColor.b or 1, edgeColor.a or 1)
 end
 
--- Enhanced function to create or reuse a main frame with custom styling options
+
+--- Creates or reuses a main frame with custom styling options.
+-- @param name The unique frame name
+-- @param width The width of the frame
+-- @param height The height of the frame
+-- @param title The title of the frame (optional)
+-- @param draggable Boolean indicating if the frame can be dragged
+-- @param bgFile Background texture file path
+-- @param edgeFile Edge texture file path
+-- @param bgColor Table with RGBA values for background color
+-- @param edgeColor Table with RGBA values for edge color
+-- @param titleFontSize Font size for the title
+-- @return The created or reused frame
 function PriestFactionGUI:CreateFrame(
     name,
     width,
@@ -75,31 +93,42 @@ function PriestFactionGUI:CreateFrame(
         frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
     end
 
+    -- Function to update child frame widths when resizing
+    function frame.UpdateChildFrameWidths()
+        if not frame or not frame.GetWidth then
+            print("Error: Parent frame does not exist or has no width.")
+            return
+        end
+
+        local children = {frame:GetChildren()}
+
+        local parentWidth = frame:GetWidth()
+        for i, child in ipairs(children) do
+            if child and child.GetWidth then  -- Ensure `child` exists and has GetWidth method
+                local childType = child.Type or ""
+                if childType == "FactionProgressFrame" then
+                    child:SetWidth(parentWidth - 20) -- Set new width for child frame
+                end
+            else
+                print("Warning: Skipping child; it does not have a GetWidth method or is nil.")
+            end
+        end
+    end
+
     return frame
 end
 
-function PriestFactionGUI:UpdateChildWidths(parent)
-    if not parent or not parent.GetWidth then
-        print("Error: Parent frame does not exist or has no width.")
-        return
-    end
 
-    local children = {parent:GetChildren()}
-
-    local parentWidth = parent:GetWidth()
-    for i, child in ipairs(children) do
-        if child and child.GetWidth then  -- Ensure `child` exists and has GetWidth method
-            local childType = child.Type or ""
-            if childType == "FactionProgressFrame" then
-                child:SetWidth(parentWidth - 20) -- Set new width for child frame
-            end
-        else
-            print("Warning: Skipping child; it does not have a GetWidth method or is nil.")
-        end
-    end
-end
-
--- Method to create or reuse a button with custom styling options
+--- Creates a button within a parent frame.
+-- @param parent The parent frame
+-- @param label The button label text
+-- @param width The button width
+-- @param height The button height
+-- @param onClick The function to call on click
+-- @param bgColor Table with RGBA values for background color
+-- @param textColor Table with RGBA values for text color
+-- @param fontSize The font size of the button text
+-- @return The created or reused button
 function PriestFactionGUI:CreateButton(parent, label, width, height, onClick, bgColor, textColor, fontSize)
     local button = table.remove(self.pool.buttons) -- Reuse from pool if available
     if not button then
@@ -171,7 +200,14 @@ function PriestFactionGUI:AddFrame(
     return frame
 end
 
--- Factory Method to create or reuse a label
+
+--- Creates a label within a parent frame.
+-- @param parent The parent frame
+-- @param text The label text
+-- @param fontSize The font size
+-- @param posX X-offset position
+-- @param posY Y-offset position
+-- @return The created or reused label
 function PriestFactionGUI:CreateLabel(parent, text, fontSize, posX, posY)
     local label = table.remove(self.pool.labels) -- Reuse from pool if available
     if not label then
@@ -187,7 +223,14 @@ function PriestFactionGUI:CreateLabel(parent, text, fontSize, posX, posY)
     return label
 end
 
--- Function to create a progress bar with a border around it
+
+--- Creates a progress bar with background and fill color.
+-- @param parent The parent frame
+-- @param width The width of the progress bar
+-- @param height The height of the progress bar
+-- @param bgColor Table with RGBA values for background color
+-- @param fillColor Table with RGBA values for fill color
+-- @return The created or reused progress bar
 function PriestFactionGUI:CreateProgressBar(parent, width, height, bgColor, fillColor)
     -- Create the outer frame to act as the border container
     local outerFrame = table.remove(self.pool.progressBars)  -- Try to reuse from pool
@@ -233,7 +276,14 @@ function PriestFactionGUI:CreateProgressBar(parent, width, height, bgColor, fill
     return outerFrame
 end
 
--- Function to create a faction progress display
+
+--- Creates a faction progress frame with an icon, name, progress bar, and status text.
+--- @param parent Frame The parent frame
+--- @param iconPath String path to the icon texture
+--- @param factionName String name of the faction
+--- @param progress Integer current progress value
+--- @param maxProgress Integer maximum progress value
+--- @return The created or reused faction progress frame
 function PriestFactionGUI:CreateFactionProgressFrame(parent, iconPath, factionName, progress, maxProgress)
     -- Create the main container frame
     local frame = self:AddFrame(parent, "", 400, 40, " ", "Interface\\Buttons\\WHITE8X8", "Interface\\Buttons\\WHITE8X8", {r=0, g=0, b=0, a=0.2}, {r=0, g=0, b=0, a=1}, 12, 0, 2)

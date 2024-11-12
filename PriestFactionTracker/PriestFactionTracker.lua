@@ -45,7 +45,7 @@ local function OnLoad()
         "OnMouseUp",
         function()
             mainFrame:StopMovingOrSizing()
-            PriestFactionGUI:UpdateChildWidths(mainFrame) -- Custom function to resize child frames
+            mainFrame:UpdateChildFrameWidths() -- Custom function to resize child frames
         end
     )
 
