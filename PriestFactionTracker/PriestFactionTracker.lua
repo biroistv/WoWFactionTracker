@@ -16,6 +16,7 @@ local function OnLoad()
         300,
         "Faction Tracker",
         true,
+        true,
         "Interface\\Buttons\\WHITE8X8",
         "Interface\\Buttons\\WHITE8X8",
         {r = 0, g = 0, b = 0, a = 0},
@@ -23,30 +24,6 @@ local function OnLoad()
         16,
         2,
         2
-    )
-    -- Enable resizing on the main frame
-    mainFrame:SetResizable(true)
-    mainFrame:SetResizeBounds(300, 200, 800, 600)
-
-    -- Add a resize handle (usually at the bottom right corner)
-    local resizeHandle = CreateFrame("Button", nil, mainFrame)
-    resizeHandle:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMRIGHT", -5, 5)
-    resizeHandle:SetSize(16, 16)
-    resizeHandle:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
-    resizeHandle:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
-    resizeHandle:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
-    resizeHandle:SetScript(
-        "OnMouseDown",
-        function()
-            mainFrame:StartSizing("BOTTOMRIGHT")
-        end
-    )
-    resizeHandle:SetScript(
-        "OnMouseUp",
-        function()
-            mainFrame:StopMovingOrSizing()
-            mainFrame:UpdateChildFrameWidths() -- Custom function to resize child frames
-        end
     )
 
     local factionFrame =

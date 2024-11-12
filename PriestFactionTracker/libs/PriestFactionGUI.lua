@@ -48,6 +48,7 @@ function PriestFactionGUI:CreateFrame(
     height,
     title,
     draggable,
+    resizable,
     bgFile,
     edgeFile,
     bgColor,
@@ -93,6 +94,33 @@ function PriestFactionGUI:CreateFrame(
         frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
     end
 
+    -- Enable resizing if specified
+    if resizable then
+        -- Enable resizing on the main frame
+        frame:SetResizable(true)
+        frame:SetResizeBounds(300, 200, 800, 600)
+
+        -- Add a resize handle (usually at the bottom right corner)
+        local resizeHandle = CreateFrame("Button", nil, frame)
+        resizeHandle:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -5, 5)
+        resizeHandle:SetSize(16, 16)
+        resizeHandle:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+        resizeHandle:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
+        resizeHandle:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+        resizeHandle:SetScript(
+            "OnMouseDown",
+            function()
+                frame:StartSizing("BOTTOMRIGHT")
+            end
+        )
+        resizeHandle:SetScript(
+            "OnMouseUp",
+            function()
+                frame:StopMovingOrSizing()
+            end
+        )
+    end
+
     -- Function to update child frame widths when resizing
     function frame.UpdateChildFrameWidths()
         if not frame or not frame.GetWidth then
@@ -114,6 +142,10 @@ function PriestFactionGUI:CreateFrame(
             end
         end
     end
+
+    frame:SetScript("OnSizeChanged", function()
+        frame.UpdateChildFrameWidths()
+    end)
 
     return frame
 end
