@@ -206,7 +206,102 @@ function PriestFactionGUI:CreateButton(parent, label, width, height, onClick, bg
     return button
 end
 
--- Function to add a sub-frame with customizable styling within a parent frame
+--- Creates a stylized button with custom color, font, font size, border, and highlight effect.
+-- @param parent The parent frame to attach the button to
+-- @param width The width of the button
+-- @param height The height of the button
+-- @param text The text to display on the button
+-- @param bgColor Table with RGBA values for the background color (e.g., {r=0.2, g=0.5, b=0.8, a=1})
+-- @param borderColor Table with RGBA values for the border color (e.g., {r=0, g=0, b=0, a=1})
+-- @param fontPath Path to the custom font (e.g., "Fonts\\FRIZQT__.TTF")
+-- @param fontSize The size of the font
+-- @return The created button
+function PriestFactionGUI:CreateStylizedButton(parent, width, height, text, bgColor, borderColor, fontPath, fontSize)
+    -- Create or reuse a button from the pool
+    local button = table.remove(self.pool.buttons) or CreateFrame("Button", nil, parent, "BackdropTemplate")
+
+    -- Set button size
+    button:SetSize(width, height)
+
+    -- Set button text
+    button:SetText(text)
+    button:SetNormalFontObject("GameFontNormal")
+
+    -- Set custom font and font size
+    local fontString = button:GetFontString()
+    fontString:SetFont(fontPath or "Fonts\\FRIZQT__.TTF", fontSize or 12)
+    fontString:SetTextColor(1, 1, 1, 1) -- Default text color to white
+
+    -- Apply background color and border
+    button:SetBackdrop(
+        {
+            bgFile = "Interface\\Buttons\\WHITE8X8", -- Solid color background
+            edgeFile = "Interface\\Buttons\\WHITE8X8", -- Solid color border
+            edgeSize = 2
+        }
+    )
+    button:SetBackdropColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a) -- Background color
+    button:SetBackdropBorderColor(borderColor.r, borderColor.g, borderColor.b, borderColor.a) -- Border color
+
+    -- Define colors for the highlight and pressed states
+    local highlightColor = {
+        r = math.min(bgColor.r + 0.2, 1),
+        g = math.min(bgColor.g + 0.2, 1),
+        b = math.min(bgColor.b + 0.2, 1),
+        a = bgColor.a
+    }
+    local pressedColor = {
+        r = math.max(bgColor.r - 0.2, 0),
+        g = math.max(bgColor.g - 0.2, 0),
+        b = math.max(bgColor.b - 0.2, 0),
+        a = bgColor.a
+    }
+
+    -- Event handlers for highlight effect
+    button:SetScript(
+        "OnEnter",
+        function(self)
+            self:SetBackdropColor(highlightColor.r, highlightColor.g, highlightColor.b, highlightColor.a)
+        end
+    )
+    button:SetScript(
+        "OnLeave",
+        function(self)
+            self:SetBackdropColor(bgColor.r, bgColor.g, bgColor.b, bgColor.a)
+        end
+    )
+    button:SetScript(
+        "OnMouseDown",
+        function(self)
+            self:SetBackdropColor(pressedColor.r, pressedColor.g, pressedColor.b, pressedColor.a)
+        end
+    )
+    button:SetScript(
+        "OnMouseUp",
+        function(self)
+            self:SetBackdropColor(highlightColor.r, highlightColor.g, highlightColor.b, highlightColor.a)
+        end
+    )
+
+    -- Show the button and return it
+    button:Show()
+    return button
+end
+
+--- Creates a sub-frame within a parent frame with custom styling options.
+-- @param parent The parent frame
+-- @param name The unique name of the sub-frame
+-- @param width The width of the sub-frame
+-- @param height The height of the sub-frame
+-- @param title The title of the sub-frame
+-- @param bgFile Background texture file path
+-- @param edgeFile Edge texture file path
+-- @param bgColor Table with RGBA values for background color
+-- @param edgeColor Table with RGBA values for edge color
+-- @param titleFontSize Font size for the title
+-- @param tileSize The size of the tile
+-- @param borderSize The size of the border
+-- @return The created or reused sub-frame
 function PriestFactionGUI:AddFrame(
     parent,
     name,

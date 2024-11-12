@@ -8,6 +8,37 @@ local PriestFactionGUI = WoWFactionTracker.PRST_FactionGUI
 -- Initialize the saved variable if it doesn’t exist
 PriestFactionTrackerDB = PriestFactionTrackerDB or {}
 
+-- Define settings groups with corresponding names
+local settingsGroups = {
+    {name = "Window"},
+    {name = "Faction"},
+    {name = "Help"},
+    {name = "About"}
+}
+
+-- Function to populate the cyan frame with settings based on selected group
+local function PopulateSettingsGroup(cyanFrame, groupName)
+    -- Clear previous content
+    for _, child in ipairs({cyanFrame:GetChildren()}) do
+        child:Hide()
+    end
+
+    -- Create a checkbox for the selected settings group
+    local checkbox = CreateFrame("CheckButton", nil, cyanFrame, "ChatConfigCheckButtonTemplate")
+    checkbox:SetPoint("TOPLEFT", cyanFrame, "TOPLEFT", 20, -20)
+    checkbox.Text:SetText(groupName)
+    checkbox.tooltip = "Toggle setting for " .. groupName
+
+    -- Set initial state from the saved variable and define the script to save changes
+    checkbox:SetChecked(PriestFactionTrackerDB[groupName] or false)
+    checkbox:SetScript(
+        "OnClick",
+        function(self)
+            PriestFactionTrackerDB[groupName] = self:GetChecked()
+        end
+    )
+end
+
 -- Function to create the settings window
 local function CreateSettingsWindow()
     -- Create the main settings frame
@@ -71,6 +102,28 @@ local function CreateSettingsWindow()
     )
     cyanFrame:SetBackdropBorderColor(0, 1, 1, 1) -- Cyan border
 
+    -- Create buttons in the red frame for each settings group
+    local previousButton
+    for i, group in ipairs(settingsGroups) do
+        local button = CreateFrame("Button", nil, redFrame, "UIPanelButtonTemplate")
+        button:SetSize(120, 30)
+        button:SetText(group.name)
+
+        if i == 1 then
+            button:SetPoint("TOPLEFT", redFrame, "TOPLEFT", 5, -5)
+        else
+            button:SetPoint("TOPLEFT", previousButton, "BOTTOMLEFT", 0, -5)
+        end
+        button:SetScript(
+            "OnClick",
+            function()
+                PopulateSettingsGroup(cyanFrame, group.name)
+            end
+        )
+
+        previousButton = button
+    end
+
     -- Create the yellow subframe (stretches horizontally only)
     local yellowFrame = CreateFrame("Frame", nil, settingsFrame, "BackdropTemplate")
     yellowFrame:SetPoint("BOTTOMLEFT", settingsFrame, "BOTTOMLEFT", 10, 10)
@@ -86,9 +139,15 @@ local function CreateSettingsWindow()
     yellowFrame:SetBackdropBorderColor(1, 1, 0, 1) -- Yellow border
 
     -- Create the close button in the bottom-right corner of the yellow frame
-    local closeButton = CreateFrame("Button", nil, yellowFrame, "UIPanelButtonTemplate")
-    closeButton:SetSize(80, 24)
-    closeButton:SetText("Close")
+    local closeButton =
+        PriestFactionGUI:CreateStylizedButton(
+        yellowFrame,
+        80,
+        24,
+        "Close",
+        {r = 0, g = 0, b = 0, a = 1},
+        {r = 1, g = 1, b = 1, a = 1}
+    )
     closeButton:SetPoint("BOTTOMRIGHT", yellowFrame, "BOTTOMRIGHT", -5, 5) -- 5-pixel padding
 
     -- Close button functionality
