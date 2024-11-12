@@ -78,6 +78,27 @@ function PriestFactionGUI:CreateFrame(
     return frame
 end
 
+function PriestFactionGUI:UpdateChildWidths(parent)
+    if not parent or not parent.GetWidth then
+        print("Error: Parent frame does not exist or has no width.")
+        return
+    end
+
+    local children = {parent:GetChildren()}
+
+    local parentWidth = parent:GetWidth()
+    for i, child in ipairs(children) do
+        if child and child.GetWidth then  -- Ensure `child` exists and has GetWidth method
+            local childType = child.Type or ""
+            if childType == "FactionProgressFrame" then
+                child:SetWidth(parentWidth - 20) -- Set new width for child frame
+            end
+        else
+            print("Warning: Skipping child; it does not have a GetWidth method or is nil.")
+        end
+    end
+end
+
 -- Method to create or reuse a button with custom styling options
 function PriestFactionGUI:CreateButton(parent, label, width, height, onClick, bgColor, textColor, fontSize)
     local button = table.remove(self.pool.buttons) -- Reuse from pool if available
@@ -115,7 +136,9 @@ function PriestFactionGUI:AddFrame(
     edgeFile,
     bgColor,
     edgeColor,
-    titleFontSize)
+    titleFontSize,
+    tileSize,
+    borderSize)
     local frame = table.remove(self.pool.frames) -- Try to reuse from pool
     if not frame then
         frame = CreateFrame("Frame", name, parent, "BackdropTemplate")
@@ -127,139 +150,9 @@ function PriestFactionGUI:AddFrame(
         bgFile,
         edgeFile,
         bgColor or {r = 0, g = 0, b = 0, a = 1},
-        edgeColor or {r = 1, g = 1, b = 1, a = 1}
-    )
-
-    -- Configure sub-frame properties
-    frame:SetSize(width, height)
-    frame:SetPoint("CENTER", parent)
-    frame:Show()
-
-    -- Title setup for the sub-frame
-    if not frame.title then
-        frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        frame.title:SetPoint("TOP", frame, "TOP", 0, -10)
-    end
-    frame.title:SetText(title or "Untitled Sub-Frame")
-    frame.title:SetFont("Fonts\\FRIZQT__.TTF", titleFontSize or 12)
-
-    return frame
-end
--- Enhanced function to create or reuse a main frame with custom styling options
-
-function PriestFactionGUI:CreateFrame(
-    name,
-    width,
-    height,
-    title,
-    draggable,
-    bgFile,
-    edgeFile,
-    bgColor,
-    edgeColor,
-    titleFontSize)
-    local frame = table.remove(self.pool.frames) -- Try to reuse from pool
-    if not frame then
-        frame = CreateFrame("Frame", name, UIParent, "BackdropTemplate")
-    end
-
-    -- Apply custom backdrop styling
-    ApplyBackdrop(
-        frame,
-        bgFile,
-        edgeFile,
-        bgColor or {r = 0, g = 0, b = 0, a = 1},
-        edgeColor or {r = 1, g = 1, b = 1, a = 1}
-    )
-
-    -- Configure frame properties
-    frame:SetSize(width, height)
-    frame:SetPoint("CENTER")
-    frame:Show()
-
-    -- Title setup
-    if not frame.title then
-        frame.title = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-        frame.title:SetPoint("TOP", frame, "TOP", 0, -10)
-    end
-    frame.title:SetText(title)
-    frame.title:SetFont("Fonts\\FRIZQT__.TTF", titleFontSize or 12)
-
-    -- Enable dragging if specified
-    if draggable then
-        frame:EnableMouse(true)
-        frame:SetMovable(true)
-        frame:RegisterForDrag("LeftButton")
-        frame:SetScript("OnDragStart", frame.StartMoving)
-        frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
-    end
-
-    return frame
-end
-
-function PriestFactionGUI:CreateButton(parent, label, width, height, onClick, bgColor, textColor, fontSize)
-    local button = table.remove(self.pool.buttons) -- Reuse from pool if available
-    if not button then
-        button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
-    end
-
-    -- Configure button properties
-    button:SetSize(width, height)
-    button:SetText(label)
-    button:SetScript("OnClick", onClick)
-    button:Show()
-
-    -- Wrap button in a backdrop frame if bgColor is provided
-    if bgColor then
-        local backdropFrame = button.backdrop or CreateFrame("Frame", nil, button, "BackdropTemplate")
-        backdropFrame:SetAllPoints()
-        backdropFrame:SetFrameLevel(button:GetFrameLevel() - 1) -- Behind the button
-        backdropFrame:SetBackdrop(
-            {
-                bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-                edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-                tile = true,
-                tileSize = 32,
-                edgeSize = 8,
-                insets = {left = 2, right = 2, top = 2, bottom = 2}
-            }
-        )
-        backdropFrame:SetBackdropColor(bgColor.r or 0, bgColor.g or 0, bgColor.b or 0, bgColor.a or 1)
-        button.backdrop = backdropFrame
-    end
-
-    -- Set custom font color and size
-    local fontString = button:GetFontString()
-    fontString:SetFont("Fonts\\FRIZQT__.TTF", fontSize or 12)
-    fontString:SetTextColor(textColor.r or 1, textColor.g or 1, textColor.b or 1, textColor.a or 1)
-
-    return button
-end
-
--- Function to add a sub-frame with customizable styling within a parent frame
-function PriestFactionGUI:AddFrame(
-    parent,
-    name,
-    width,
-    height,
-    title,
-    bgFile,
-    edgeFile,
-    bgColor,
-    edgeColor,
-    titleFontSize)
-    local frame = table.remove(self.pool.frames) -- Try to reuse from pool
-    if not frame then
-        frame = CreateFrame("Frame", name, parent, "BackdropTemplate")
-    end
-
-    -- Apply custom backdrop styling
-    ApplyBackdrop(
-        frame,
-        bgFile,
-        edgeFile,
-        bgColor or {r = 0, g = 0, b = 0, a = 1},
-        edgeColor or {r = 1, g = 1, b = 1, a = 1}
+        edgeColor or {r = 1, g = 1, b = 1, a = 1},
+        tileSize,
+        borderSize
     )
 
     -- Configure sub-frame properties
@@ -343,8 +236,9 @@ end
 -- Function to create a faction progress display
 function PriestFactionGUI:CreateFactionProgressFrame(parent, iconPath, factionName, progress, maxProgress)
     -- Create the main container frame
-    local frame = self:CreateFrame(nil, 400, 40, nil, false, "Interface\\Buttons\\WHITE8X8", " ", {r=0, g=0, b=0, a=0.2})
+    local frame = self:AddFrame(parent, "", 400, 40, " ", "Interface\\Buttons\\WHITE8X8", "Interface\\Buttons\\WHITE8X8", {r=0, g=0, b=0, a=0.2}, {r=0, g=0, b=0, a=1}, 12, 0, 2)
     frame:SetPoint("CENTER", parent, "CENTER")
+    frame.Type = "FactionProgressFrame"
 
      -- Create the icon border
      local iconBorder = CreateFrame("Frame", nil, frame, "BackdropTemplate")
@@ -375,7 +269,7 @@ function PriestFactionGUI:CreateFactionProgressFrame(parent, iconPath, factionNa
 
     -- Create the progress bar
     local progressBar = self:CreateProgressBar(frame, 260, 8, { r = 0.2, g = 0.2, b = 0.2, a = 1 }, { r = 0.1, g = 0.6, b = 1, a = 1 })
-    progressBar:SetPoint("TOPLEFT", icon, "TOPRIGHT", 10, -16)
+    progressBar:SetPoint("TOPLEFT", icon, "TOPRIGHT", 10, -13)
     progressBar:SetProgress(math.floor((progress / maxProgress) * 100))  -- Set initial progress
 
     -- Create the status text
@@ -388,6 +282,10 @@ function PriestFactionGUI:CreateFactionProgressFrame(parent, iconPath, factionNa
         progressBar:SetProgress(math.floor((current / maximum) * 100))
         statusText:SetText(string.format("%d/%d", current, maximum))
     end
+
+    frame:SetWidth(parent:GetWidth() - 20)
+    parent.childFrames = parent.childFrames or {}
+    table.insert(parent.childFrames, frame)
 
     return frame
 end

@@ -24,6 +24,30 @@ local function OnLoad()
         2,
         2
     )
+    -- Enable resizing on the main frame
+    mainFrame:SetResizable(true)
+    mainFrame:SetResizeBounds(300, 200, 800, 600)
+
+    -- Add a resize handle (usually at the bottom right corner)
+    local resizeHandle = CreateFrame("Button", nil, mainFrame)
+    resizeHandle:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMRIGHT", -5, 5)
+    resizeHandle:SetSize(16, 16)
+    resizeHandle:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+    resizeHandle:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
+    resizeHandle:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+    resizeHandle:SetScript(
+        "OnMouseDown",
+        function()
+            mainFrame:StartSizing("BOTTOMRIGHT")
+        end
+    )
+    resizeHandle:SetScript(
+        "OnMouseUp",
+        function()
+            mainFrame:StopMovingOrSizing()
+            PriestFactionGUI:UpdateChildWidths(mainFrame) -- Custom function to resize child frames
+        end
+    )
 
     local factionFrame =
         PriestFactionGUI:CreateFactionProgressFrame(
