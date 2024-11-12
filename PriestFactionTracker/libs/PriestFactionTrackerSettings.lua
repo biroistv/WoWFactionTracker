@@ -4,9 +4,7 @@ local _, WoWFactionTracker = ...
 WoWFactionTracker.PRST_FactionTrackerSettings = {}
 local PriestFactionTrackerSettingsGUI = WoWFactionTracker.PRST_FactionTrackerSettings
 local PriestFactionGUI = WoWFactionTracker.PRST_FactionGUI
-
--- Initialize the saved variable if it doesn’t exist
-PriestFactionTrackerDB = PriestFactionTrackerDB or {}
+local PriestFactionTrackerSavedVariableHandler = WoWFactionTracker.PRST_FactionTrackerSavedVariableHandler
 
 -- Define settings sections with collapsible headers and their respective options
 local settingsSections = {
@@ -25,7 +23,7 @@ local settingsSections = {
 }
 
 -- Function to reposition all sections and options dynamically
-function UpdateSectionLayout(redFrame, sections)
+local function UpdateSectionLayout(redFrame, sections)
     local offsetY = -5
     for _, section in ipairs(sections) do
         -- Position the headerButton relative to redFrame
