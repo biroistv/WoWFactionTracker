@@ -34,6 +34,15 @@ local function OnLoad()
         1500, -- Current progress
         2000 -- Max progress
     )
+
+    local factionFrame2 =
+        PriestFactionGUI:CreateFactionProgressFrame(
+        mainFrame, -- Parent frame
+        "Interface\\Icons\\INV_Misc_Head_Human_01", -- Icon path
+        "Example Faction 2", -- Faction name
+        1500, -- Current progress
+        2000 -- Max progress
+    )
 end
 
 -- Event listener for addon loading
