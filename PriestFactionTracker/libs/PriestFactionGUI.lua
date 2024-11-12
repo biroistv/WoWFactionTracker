@@ -3,6 +3,7 @@ local _, WoWFactionTracker = ...
 
 WoWFactionTracker.PRST_FactionGUI = {}
 local PriestFactionGUI = WoWFactionTracker.PRST_FactionGUI
+local PriestFactionTrackerSavedVariableHandler = WoWFactionTracker.PRST_FactionTrackerSavedVariableHandler
 
 -- Constants for GUI element types
 local UNIQUE_FRAME_ID = 0 -- Initialize a global identifier counter
@@ -118,6 +119,21 @@ function PriestFactionGUI:CreateFrame(
             "OnMouseUp",
             function()
                 frame:StopMovingOrSizing()
+
+                local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint() -- Get the frame's position details
+
+                -- Save the position details, storing the frame name instead of the frame object
+                PriestFactionTrackerSavedVariableHandler.Set(
+                    "MainTrackerFramePoint",
+                    {
+                        point = point,
+                        relativePoint = relativePoint,
+                        xOffset = xOffset,
+                        yOffset = yOffset,
+                        width = frame:GetWidth(),
+                        height = frame:GetHeight()
+                    }
+                )
             end
         )
     end
@@ -165,6 +181,21 @@ function PriestFactionGUI:CreateFrame(
         "OnSizeChanged",
         function()
             frame.UpdateChildFrameWidths()
+
+            local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint() -- Get the frame's position details
+
+            -- Save the position details, storing the frame name instead of the frame object
+            PriestFactionTrackerSavedVariableHandler.Set(
+                "MainTrackerFramePoint",
+                {
+                    point = point,
+                    relativePoint = relativePoint,
+                    xOffset = xOffset,
+                    yOffset = yOffset,
+                    width = frame:GetWidth(),
+                    height = frame:GetHeight()
+                }
+            )
         end
     )
 

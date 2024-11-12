@@ -32,6 +32,12 @@ local function OnLoad()
         2
     )
 
+    local savedPoint = PriestFactionTrackerSavedVariableHandler.Get("MainTrackerFramePoint")
+    if (savedPoint ~= nil) then
+        mainFrame:SetPoint(savedPoint.point, UIParent, savedPoint.relativePoint, savedPoint.xOffset, savedPoint.yOffset)
+        mainFrame:SetSize(savedPoint.width, savedPoint.height)
+    end
+
     local factionFrame =
         PriestFactionGUI:CreateFactionProgressFrame(
         mainFrame, -- Parent frame
