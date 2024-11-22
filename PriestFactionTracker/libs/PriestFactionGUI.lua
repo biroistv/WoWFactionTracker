@@ -141,6 +141,7 @@ function PriestFactionGUI:CreateFrame(
     -- Function to update child frame widths when resizing
     function frame.UpdateChildFrameWidths()
         if not frame or not frame.GetWidth then
+            print("Error: Parent frame does not exist or has no width.")
             return
         end
 
@@ -153,6 +154,8 @@ function PriestFactionGUI:CreateFrame(
                 if childType == "FactionProgressFrame" then
                     child:SetWidth(parentWidth - 20) -- Set new width for child frame
                 end
+            else
+                print("Warning: Skipping child; it does not have a GetWidth method or is nil.")
             end
         end
     end
@@ -574,6 +577,8 @@ function PriestFactionGUI:RemoveFactionProgressFrame(parent, frameId)
 
         -- Reorganize remaining frames
         parent.ReorganizeChildFrames(5)
+    else
+        print("Error: FactionProgressFrame with ID " .. frameId .. " not found.")
     end
 end
 

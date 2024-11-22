@@ -7,7 +7,9 @@ local PriestFactionTrackerSavedVariableHandler = WoWFactionTracker.PRST_FactionT
 
 -- Function to be called when the addon is loaded
 function PriestFactionTrackerSavedVariableHandler.Initialize()
+    print("Initializing PriestFactionTrackerSavedVariableHandler")
     if not PriestFactionTrackerDB then
+        print("Initializing PriestFactionTrackerDB")
         PriestFactionTrackerDB = {}
     end
 end
@@ -20,6 +22,12 @@ end
 --- Set a value in the saved variables
 function PriestFactionTrackerSavedVariableHandler.Set(key, value)
     if PriestFactionTrackerDB then
+        -- Add data validation if necessary
+        print(key)
+        for k, v in pairs(value) do
+            print(k, v)
+        end
+
         PriestFactionTrackerDB[key] = value
     end
 end

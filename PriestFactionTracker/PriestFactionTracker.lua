@@ -9,6 +9,8 @@ local PriestFactionTrackerSavedVariableHandler = WoWFactionTracker.PRST_FactionT
 -- Function to be called when the addon is loaded
 -- =============================================================================
 local function OnLoad()
+    print(addonName .. " loaded successfully!")
+
     PriestFactionTrackerSavedVariableHandler.Initialize()
 
     -- Create a frame using the GUI library

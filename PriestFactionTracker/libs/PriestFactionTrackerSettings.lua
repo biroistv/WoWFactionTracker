@@ -22,6 +22,97 @@ local settingsSections = {
     }
 }
 
+-- Reference to the cyan frame
+local cyanFrame = nil
+
+-- Function to create the cyan frame (if not already created)
+local function CreateCyanFrame(parent, separatorFrame, settingsFrame)
+    if not cyanFrame then
+        cyanFrame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
+        cyanFrame:SetPoint("TOPLEFT", separatorFrame, "TOPRIGHT", 10, 0)
+        cyanFrame:SetPoint("BOTTOMRIGHT", settingsFrame, "BOTTOMRIGHT", -10, 60)
+        cyanFrame:SetBackdrop(
+            {
+                bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+                edgeFile = "Interface\\Buttons\\WHITE8X8",
+                edgeSize = 2
+            }
+        )
+        cyanFrame:SetBackdropBorderColor(0, 1, 1, 1) -- Cyan border
+        cyanFrame:SetBackdropColor(0, 0, 0, 0) -- Transparent background
+    end
+    return cyanFrame
+end
+
+-- Function to clear the cyan frame's content
+local function ClearCyanFrame()
+    print("Clearing cyan frame")
+    if cyanFrame then
+        -- Clear FontString regions
+        for _, region in ipairs({cyanFrame:GetRegions()}) do
+            if region:GetObjectType() == "FontString" then
+                PriestFactionGUI:ReleaseLabel(region) -- Release the FontString
+            end
+        end
+
+        -- Clear child frames (if any)
+        for _, child in ipairs({cyanFrame:GetChildren()}) do
+            child:Hide()
+            child:SetParent(nil) -- Unparent the child frame
+        end
+    end
+end
+
+-- Function to load specific content into the cyan frame
+local function LoadCyanContent(contentType)
+    ClearCyanFrame()
+
+    -- Returns the memory usage of a given addon in KB
+    local function GetAddonMemoryUsage(addonName)
+        -- Check if the addon name is provided
+        if not addonName or addonName == "" then
+            return nil, "Addon name is required."
+        end
+
+        -- Iterate through all addons to find the index of the given addon
+        local addonIndex
+        for i = 1, C_AddOns.GetNumAddOns() do
+            local name = C_AddOns.GetAddOnInfo(i)
+            print(name)
+            if name == addonName then
+                addonIndex = i
+                break
+            end
+        end
+
+        -- If the addon was not found
+        if not addonIndex then
+            return nil, "Addon not found: " .. addonName
+        end
+
+        -- Update the memory usage data
+        UpdateAddOnMemoryUsage()
+
+        -- Get and return the memory usage of the addon
+        local memoryUsage = GetAddOnMemoryUsage(addonIndex)
+        return memoryUsage, nil
+    end
+
+    if contentType == "Settings Frame" then
+        -- Example: Add content for the General section
+        local label = PriestFactionGUI:CreateLabel(cyanFrame, GetAddonMemoryUsage("PriestFactionTracker"), 16, 10, -10)
+        label:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
+    elseif contentType == "Tracker Frame" then
+        -- Example: Add content for the Faction Tracker section
+        local label = PriestFactionGUI:CreateLabel(cyanFrame, "Faction Tracker Settings", 16, 10, -10)
+        label:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
+    elseif contentType == "Faction" then
+        -- Example: Add content for the System section
+        local label = PriestFactionGUI:CreateLabel(cyanFrame, "System Settings", 16, 10, -10)
+        label:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
+    end
+end
+
 -- Function to reposition all sections and options dynamically
 local function UpdateSectionLayout(redFrame, sections)
     local offsetY = -5
@@ -90,7 +181,7 @@ local function CreateCollapsibleSection(parent, sectionData, allSections)
         optionButton:SetScript(
             "OnClick",
             function()
-                print("Selected option:", option)
+                LoadCyanContent(option)
             end
         )
     end
@@ -154,7 +245,7 @@ local function CreateSettingsWindow()
             edgeSize = 2
         }
     )
-    greenFrame:SetBackdropBorderColor(0, 0, 0, 0) -- Green border
+    greenFrame:SetBackdropBorderColor(0, 1, 0, 1) -- Green border
     greenFrame:SetBackdropColor(0, 0, 0, 0) -- Green border
     PriestFactionGUI:CreateLabel(greenFrame, "Priest Faction Tracker Settings", 16, 5, 0)
 
@@ -169,7 +260,7 @@ local function CreateSettingsWindow()
             edgeSize = 2
         }
     )
-    redFrame:SetBackdropBorderColor(1, 0, 0, 0) -- Red border
+    redFrame:SetBackdropBorderColor(1, 0, 0, 1) -- Red border
     redFrame:SetBackdropColor(0, 0, 0, 0) -- Transparent background
 
     PopulateRedFrameWithSections(redFrame)
@@ -189,18 +280,7 @@ local function CreateSettingsWindow()
     separatorFrame:SetBackdropColor(0, 0, 0, 0) -- Transparent background
 
     -- Create the cyan subframe (tracks both X and Y axes)
-    local cyanFrame = CreateFrame("Frame", nil, settingsFrame, "BackdropTemplate")
-    cyanFrame:SetPoint("TOPLEFT", separatorFrame, "TOPRIGHT", 10, 0)
-    cyanFrame:SetPoint("BOTTOMRIGHT", settingsFrame, "BOTTOMRIGHT", -10, 60)
-    cyanFrame:SetBackdrop(
-        {
-            bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-            edgeFile = "Interface\\Buttons\\WHITE8X8",
-            edgeSize = 2
-        }
-    )
-    cyanFrame:SetBackdropBorderColor(0, 1, 1, 0) -- Cyan border
-    cyanFrame:SetBackdropColor(0, 0, 0, 0) -- Transparent background
+    CreateCyanFrame(settingsFrame, separatorFrame, settingsFrame)
 
     -- Create the yellow subframe (stretches horizontally only)
     local yellowFrame = CreateFrame("Frame", nil, settingsFrame, "BackdropTemplate")
@@ -214,7 +294,7 @@ local function CreateSettingsWindow()
             edgeSize = 2
         }
     )
-    yellowFrame:SetBackdropBorderColor(1, 1, 0, 0) -- Yellow border
+    yellowFrame:SetBackdropBorderColor(1, 1, 0, 1) -- Yellow border
     yellowFrame:SetBackdropColor(0, 0, 0, 0) -- Transparent background
 
     -- Create the close button in the bottom-right corner of the yellow frame
