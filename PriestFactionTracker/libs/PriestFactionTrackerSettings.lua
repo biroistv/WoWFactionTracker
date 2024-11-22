@@ -24,6 +24,7 @@ local settingsSections = {
 
 -- Reference to the cyan frame
 local cyanFrame = nil
+local currentOptions = ""
 
 -- Function to create the cyan frame (if not already created)
 local function CreateCyanFrame(parent, separatorFrame, settingsFrame)
@@ -46,70 +47,71 @@ end
 
 -- Function to clear the cyan frame's content
 local function ClearCyanFrame()
-    print("Clearing cyan frame")
+    print("----------------------ClearCyanFrame()----------------------")
+
     if cyanFrame then
         -- Clear FontString regions
+        print("Clearing FontString regions")
+
         for _, region in ipairs({cyanFrame:GetRegions()}) do
             if region:GetObjectType() == "FontString" then
                 PriestFactionGUI:ReleaseLabel(region) -- Release the FontString
             end
         end
 
+        print("Clearing children")
         -- Clear child frames (if any)
         for _, child in ipairs({cyanFrame:GetChildren()}) do
-            child:Hide()
-            child:SetParent(nil) -- Unparent the child frame
+            if child:GetObjectType() == "Frame" then
+                PriestFactionGUI:ReleaseFrame(child)
+            end
         end
     end
 end
 
 -- Function to load specific content into the cyan frame
 local function LoadCyanContent(contentType)
-    ClearCyanFrame()
-
-    -- Returns the memory usage of a given addon in KB
-    local function GetAddonMemoryUsage(addonName)
-        -- Check if the addon name is provided
-        if not addonName or addonName == "" then
-            return nil, "Addon name is required."
-        end
-
-        -- Iterate through all addons to find the index of the given addon
-        local addonIndex
-        for i = 1, C_AddOns.GetNumAddOns() do
-            local name = C_AddOns.GetAddOnInfo(i)
-            print(name)
-            if name == addonName then
-                addonIndex = i
-                break
-            end
-        end
-
-        -- If the addon was not found
-        if not addonIndex then
-            return nil, "Addon not found: " .. addonName
-        end
-
-        -- Update the memory usage data
-        UpdateAddOnMemoryUsage()
-
-        -- Get and return the memory usage of the addon
-        local memoryUsage = GetAddOnMemoryUsage(addonIndex)
-        return memoryUsage, nil
+    if (currentOptions == contentType) then
+        return
     end
+
+    ClearCyanFrame()
 
     if contentType == "Settings Frame" then
         -- Example: Add content for the General section
-        local label = PriestFactionGUI:CreateLabel(cyanFrame, GetAddonMemoryUsage("PriestFactionTracker"), 16, 10, -10)
+        local label = PriestFactionGUI:CreateLabel(cyanFrame, "Settings Frame", 16, 10, -10)
         label:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
+        currentOptions = contentType
     elseif contentType == "Tracker Frame" then
         -- Example: Add content for the Faction Tracker section
         local label = PriestFactionGUI:CreateLabel(cyanFrame, "Faction Tracker Settings", 16, 10, -10)
         label:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
+        currentOptions = contentType
     elseif contentType == "Faction" then
+        print("Creating Factions content")
+
         -- Example: Add content for the System section
-        local label = PriestFactionGUI:CreateLabel(cyanFrame, "System Settings", 16, 10, -10)
-        label:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
+        local factionFrame =
+            PriestFactionGUI:AddFrame(
+            cyanFrame,
+            contentType,
+            cyanFrame:GetWidth() - 20,
+            cyanFrame:GetHeight() - 20,
+            "Factions",
+            "Interface\\Buttons\\WHITE8X8",
+            "Interface\\Buttons\\WHITE8X8",
+            {r = 1, g = 0, b = 1, a = 0},
+            {r = 1, g = 0, b = 1, a = 1},
+            16,
+            2,
+            2
+        )
+        -- Set the size of the child frame relative to the parent frame's sizew
+        factionFrame:SetPoint("TOPLEFT", cyanFrame, "TOPLEFT", 10, -10) -- Offset -30 from the top
+        factionFrame:SetPoint("BOTTOMRIGHT", cyanFrame, "BOTTOMRIGHT", -10, 10) -- Attach to the bottom-right corner without offset
+        factionFrame:Show()
+
+        currentOptions = contentType
     end
 end
 

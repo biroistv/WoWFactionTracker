@@ -9,7 +9,7 @@ local PriestFactionTrackerSavedVariableHandler = WoWFactionTracker.PRST_FactionT
 local UNIQUE_FRAME_ID = 0 -- Initialize a global identifier counter
 
 -- GUI Pool to store and reuse frames and buttons
-PriestFactionGUI.pool = {frames = {}, buttons = {}, labels = {}, progressBars = {}}
+PriestFactionGUI.pool = PriestFactionGUI.pool or {frames = {}, buttons = {}, labels = {}, progressBars = {}}
 
 --- Applies a backdrop style to a frame.
 -- @param frame The frame to style
@@ -346,6 +346,16 @@ function PriestFactionGUI:AddFrame(
     titleFontSize,
     tileSize,
     borderSize)
+    -- Validate required inputs
+    if not parent or not name then
+        error("Invalid arguments: 'parent' and 'name' are required.")
+    end
+
+    -- Check for pool initialization
+    if not self.pool then
+        error("PriestFactionGUI.pool is not initialized. Ensure it is set up properly.")
+    end
+
     local frame = table.remove(self.pool.frames) -- Try to reuse from pool
     if not frame then
         frame = CreateFrame("Frame", name, parent, "BackdropTemplate")
@@ -364,7 +374,6 @@ function PriestFactionGUI:AddFrame(
 
     -- Configure sub-frame properties
     frame:SetSize(width, height)
-    frame:SetPoint("CENTER", parent)
     frame:Show()
 
     -- Title setup for the sub-frame
@@ -386,16 +395,28 @@ end
 -- @param posY Y-offset position
 -- @return The created or reused label
 function PriestFactionGUI:CreateLabel(parent, text, fontSize, posX, posY)
+    print("----------------------CreateLabel()----------------------")
+
+    print("Label Pool Size:", #self.pool.labels)
     local label = table.remove(self.pool.labels) -- Reuse from pool if available
     if not label then
+        print("Creating new label")
         label = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    end
+        label:SetPoint("TOPLEFT", posX, posY)
+        label:SetFont("Fonts\\FRIZQT__.TTF", fontSize or 12)
+        label:SetText(text)
+        label:Show()
+    else
+        print("Reuse label from pool")
+        print("Label Pool Size:", #self.pool.labels)
 
-    -- Configure label properties
-    label:SetPoint("TOPLEFT", posX, posY)
-    label:SetFont("Fonts\\FRIZQT__.TTF", fontSize or 12)
-    label:SetText(text)
-    label:Show()
+        -- Configure label properties
+        label:SetParent(parent)
+        label:SetPoint("TOPLEFT", posX, posY)
+        label:SetFont("Fonts\\FRIZQT__.TTF", fontSize or 12)
+        label:SetText(text)
+        label:Show()
+    end
 
     return label
 end
@@ -483,6 +504,7 @@ function PriestFactionGUI:CreateFactionProgressFrame(parent, iconPath, factionNa
         0,
         2
     )
+    frame:SetPoint("CENTER", parent)
 
     -- Determine the position of the new child frame
     if #parent.childFrames == 0 then
@@ -584,6 +606,7 @@ end
 
 -- Method to release a frame back to the pool
 function PriestFactionGUI:ReleaseFrame(frame)
+    print("----------------------ReleaseFrame()----------------------")
     frame:Hide()
     frame:ClearAllPoints()
     frame.title:SetText("")
@@ -599,9 +622,20 @@ end
 
 -- Method to release a label back to the pool
 function PriestFactionGUI:ReleaseLabel(label)
-    label:Hide()
-    label:SetText("")
+    print("----------------------ReleaseLabel()----------------------")
+
+    -- Reset the label's state
+    label:ClearAllPoints()
+    label:SetParent(nil) -- Detach from parent
+    label:SetText("") -- Clear text
+    label:SetFont("Fonts\\FRIZQT__.TTF", 12) -- Reset to default font
+    label:SetTextColor(1, 1, 1, 1) -- Reset text color
+    label:Hide() -- Hide the label to stop rendering
+
+    print("Label Pool Size:", #self.pool.labels)
+    print("Insert label back to pool")
     table.insert(self.pool.labels, label)
+    print("Label Pool Size:", #self.pool.labels)
 end
 
 -- Method to release a progress bar back to the pool
