@@ -1,4 +1,4 @@
--- Initialize addon namespace
+-- Initialize add-on namespace
 -- =============================================================================
 local addonName, WoWFactionTracker = ...
 

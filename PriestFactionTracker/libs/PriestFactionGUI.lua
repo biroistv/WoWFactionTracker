@@ -404,24 +404,29 @@ function PriestFactionGUI:CreateLabel(parent, text, fontSize, posX, posY)
 
     print("Label Pool Size:", #self.pool.labels)
     local label = table.remove(self.pool.labels) -- Reuse from pool if available
+
     if not label then
+        -- Create a new label if none are available in the pool
         print("Creating new label")
         label = parent:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        label:SetPoint("TOPLEFT", posX, posY)
-        label:SetFont("Fonts\\FRIZQT__.TTF", fontSize or 12)
-        label:SetText(text)
-        label:Show()
     else
-        print("Reuse label from pool")
+        -- Ensure the label is reset properly when reusing from the pool
+        print("Reusing label from pool")
         print("Label Pool Size:", #self.pool.labels)
-
-        -- Configure label properties
-        label:SetParent(parent)
-        label:SetPoint("TOPLEFT", posX, posY)
-        label:SetFont("Fonts\\FRIZQT__.TTF", fontSize or 12)
-        label:SetText(text)
-        label:Show()
     end
+
+    -- Configure label properties
+    label:ClearAllPoints() -- Reset points before setting new ones
+    label:SetParent(parent) -- Ensure parent is set correctly
+    label:SetPoint("TOPLEFT", posX, posY) -- Set position
+    label:SetFont("Fonts\\FRIZQT__.TTF", fontSize or 12) -- Set font
+    label:SetText(text) -- Set the label's text
+    label:SetTextColor(1, 1, 1, 1) -- Reset to default color (optional)
+    label:Show() -- Ensure the label is visible
+
+    -- Debug output to verify state
+    print("Label Text:", label:GetText())
+    print("----------------------CreateLabel() Done----------------------")
 
     return label
 end
@@ -594,6 +599,31 @@ function PriestFactionGUI:CreateCollapsibleFrame(
                 frame:SetHeight(collapsedHeight)
             end
             isCollapsed = not isCollapsed
+        end
+    )
+
+    frame:SetScript(
+        "OnHide",
+        function()
+            -- Release the Button
+            self:ReleaseElement(frame.collapseButton)
+
+            -- Release the content frame strings
+            for _, region in ipairs({frame.contentFrame:GetRegions()}) do
+                if region:GetObjectType() == "FontString" then
+                    self:ReleaseElement(region) -- Release the FontString
+                end
+            end
+
+            -- Release the content frame other children
+            for _, child in ipairs({frame.contentFrame:GetChildren()}) do
+                if child:GetObjectType() == "Frame" then
+                    self:ReleaseElement(child)
+                end
+            end
+
+            self:ReleaseElement(frame.contentFrame) -- Release the content frame
+            self:ReleaseElement(frame) -- Release the main frame
         end
     )
 
@@ -772,6 +802,37 @@ function PriestFactionGUI:ReleaseProgressBar(progressBar)
     progressBar:Hide()
     progressBar:SetValue(0) -- Reset to 0
     table.insert(self.pool.progressBars, progressBar)
+end
+
+-- Generalized method to release any GUI element back to its pool
+function PriestFactionGUI:ReleaseElement(element)
+    print("----------------------ReleaseElement()----------------------")
+
+    -- Identify the type of element and delegate to the appropriate release function
+    if element.title and element.SetText then
+        -- It's a frame
+        self:ReleaseFrame(element)
+        print("Delegated to ReleaseFrame")
+    elseif element.SetText and not element.SetFont then
+        -- It's a button
+        self:ReleaseButton(element)
+        print("Delegated to ReleaseButton")
+    elseif element.SetFont then
+        -- It's a label
+        self:ReleaseLabel(element)
+        print("Delegated to ReleaseLabel")
+    elseif element.SetValue then
+        -- It's a progress bar
+        self:ReleaseProgressBar(element)
+        print("Delegated to ReleaseProgressBar")
+    else
+        -- Unknown type, fallback logic
+        print("Unknown element type, hiding as fallback.")
+        element:Hide()
+        element:ClearAllPoints()
+    end
+
+    print("----------------------ReleaseElement() Done----------------------")
 end
 
 return PriestFactionGUI
