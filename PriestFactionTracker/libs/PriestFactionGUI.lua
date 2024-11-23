@@ -45,6 +45,7 @@ end
 -- @param titleFontSize Font size for the title
 -- @return The created or reused frame
 function PriestFactionGUI:CreateFrame(
+    parent,
     name,
     width,
     height,
@@ -60,7 +61,11 @@ function PriestFactionGUI:CreateFrame(
     borderSize)
     local frame = table.remove(self.pool.frames) -- Try to reuse from pool
     if not frame then
-        frame = CreateFrame("Frame", name, UIParent, "BackdropTemplate")
+        if parent == nil then
+            frame = CreateFrame("Frame", name, UIParent, "BackdropTemplate")
+        else
+            frame = CreateFrame("Frame", name, parent, "BackdropTemplate")
+        end
     end
 
     -- Apply custom backdrop styling
@@ -473,6 +478,130 @@ function PriestFactionGUI:CreateProgressBar(parent, width, height, bgColor, fill
     end
 
     return outerFrame
+end
+
+-- Creates a collapsible frame with a title, collapse/expand button, and content frame.
+-- @param parent The parent frame
+-- @param title The title of the collapsible frame
+-- @param width The width of the frame
+-- @param height The height of the frame
+-- @param draggable Boolean indicating if the frame can be dragged
+-- @param resizable Boolean indicating if the frame can be resized
+-- @param bgFile Background texture file path
+-- @param edgeFile Edge texture file path
+-- @param bgColor Table with RGBA values for background color
+-- @param edgeColor Table with RGBA values for edge color
+-- @param titleFontSize Font size for the title
+-- @param tileSize The size of the tile
+-- @param borderSize The size of the border
+function PriestFactionGUI:CreateCollapsibleFrame(
+    parent,
+    name,
+    width,
+    height,
+    title,
+    draggable,
+    resizable,
+    bgFile,
+    edgeFile,
+    bgColor,
+    edgeColor,
+    titleFontSize,
+    tileSize,
+    borderSize)
+    -- Create the main frame using the existing CreateFrame function
+    local frame =
+        self:CreateFrame(
+        parent,
+        name,
+        width,
+        height,
+        title,
+        draggable,
+        resizable,
+        bgFile,
+        edgeFile,
+        bgColor,
+        edgeColor,
+        titleFontSize,
+        tileSize,
+        borderSize
+    )
+
+    -- **Set the anchor point to TOPLEFT to prevent repositioning**
+    frame:ClearAllPoints()
+    frame:SetPoint("TOPLEFT", parent, "TOPLEFT", 10, -10) -- Adjust offsets as needed
+
+    -- Add a toggle button for collapsibility
+    if not frame.collapseButton then
+        frame.collapseButton =
+            self:CreateStylizedButton(
+            frame,
+            20,
+            20,
+            "-",
+            {r = 0.2, g = 0.2, b = 0.2, a = 1},
+            {r = 1, g = 1, b = 1, a = 1},
+            "Fonts\\FRIZQT__.TTF",
+            12
+        )
+        frame.collapseButton:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -10, -10)
+    end
+
+    -- Create a content frame
+    if not frame.contentFrame then
+        frame.contentFrame =
+            self:CreateFrame(
+            frame,
+            name .. "Content",
+            width - 20,
+            height - 40,
+            "",
+            false,
+            false,
+            bgFile,
+            edgeFile,
+            bgColor,
+            edgeColor,
+            titleFontSize,
+            tileSize,
+            borderSize
+        )
+        -- **Anchor contentFrame to TOPLEFT of frame**
+        frame.contentFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, -40)
+        frame.contentFrame:SetPoint("RIGHT", frame, "RIGHT", -10, 0)
+        frame.contentFrame:SetHeight(height - 60) -- Adjust based on your layout
+        frame.contentFrame:Show()
+    end
+
+    -- Store expanded and collapsed heights
+    local expandedHeight = height
+    local collapsedHeight = 60 -- Adjust this based on the actual height of the title bar and collapse button
+
+    -- Handle collapse/expand functionality
+    local isCollapsed = false
+
+    frame.collapseButton:SetScript(
+        "OnClick",
+        function()
+            if isCollapsed then
+                frame.contentFrame:Show()
+                frame.collapseButton:SetText("-")
+                frame:SetHeight(expandedHeight)
+            else
+                frame.contentFrame:Hide()
+                frame.collapseButton:SetText("+")
+                frame:SetHeight(collapsedHeight)
+            end
+            isCollapsed = not isCollapsed
+        end
+    )
+
+    -- Attach child frames list for reorganizing
+    frame.childFrames = frame.childFrames or {}
+
+    -- Return both the main frame and the content frame for further customization
+    return frame, frame.contentFrame
 end
 
 --- Creates a faction progress frame with an icon, name, progress bar, and status text.

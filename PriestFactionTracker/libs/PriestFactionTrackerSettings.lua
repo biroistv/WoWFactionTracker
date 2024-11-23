@@ -4,6 +4,7 @@ local _, WoWFactionTracker = ...
 WoWFactionTracker.PRST_FactionTrackerSettings = {}
 local PriestFactionTrackerSettingsGUI = WoWFactionTracker.PRST_FactionTrackerSettings
 local PriestFactionGUI = WoWFactionTracker.PRST_FactionGUI
+local PriestFactionDatabase = WoWFactionTracker.PRST_PriestFactionDatabase
 local PriestFactionTrackerSavedVariableHandler = WoWFactionTracker.PRST_FactionTrackerSavedVariableHandler
 
 -- Define settings sections with collapsible headers and their respective options
@@ -91,31 +92,38 @@ local function LoadCyanContent(contentType)
         print("Creating Factions content")
 
         -- Example: Add content for the System section
-        local factionFrame =
-            PriestFactionGUI:AddFrame(
+        local clasicClosableFrame, classicClosableContent =
+            PriestFactionGUI:CreateCollapsibleFrame(
             cyanFrame,
-            contentType,
+            "Classic",
             cyanFrame:GetWidth() - 20,
             cyanFrame:GetHeight() - 20,
-            "Factions",
+            "Classic Reputations",
+            false,
+            false,
             "Interface\\Buttons\\WHITE8X8",
             "Interface\\Buttons\\WHITE8X8",
-            {r = 1, g = 0, b = 1, a = 0},
-            {r = 1, g = 0, b = 1, a = 1},
-            16,
-            2,
+            {r = 1, g = 1, b = 1, a = 0},
+            {r = 1, g = 1, b = 1, a = 0.6},
+            14,
+            14,
             2
         )
-        -- Set the size of the child frame relative to the parent frame's sizew
-        factionFrame:SetPoint("TOPLEFT", cyanFrame, "TOPLEFT", 10, -10) -- Offset -30 from the top
-        factionFrame:SetPoint("BOTTOMRIGHT", cyanFrame, "BOTTOMRIGHT", -10, 10) -- Attach to the bottom-right corner without offset
-        factionFrame:Show()
+
+        local tblClassicFactions = PriestFactionDatabase:GetFactionsByExpansion("Classic")
+        local startY = -10
+        for _, faction in ipairs(tblClassicFactions) do
+            PriestFactionGUI:CreateLabel(classicClosableContent, faction.Name, 10, 10, startY)
+            startY = startY - 10
+        end
 
         currentOptions = contentType
     end
 end
 
 -- Function to reposition all sections and options dynamically
+---@param redFrame any
+---@param sections any
 local function UpdateSectionLayout(redFrame, sections)
     local offsetY = -5
     for _, section in ipairs(sections) do
@@ -219,6 +227,7 @@ local function CreateSettingsWindow()
     -- Create the main settings frame
     local settingsFrame =
         PriestFactionGUI:CreateFrame(
+        nil,
         "MainTrackerFrame",
         400,
         300,

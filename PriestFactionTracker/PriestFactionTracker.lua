@@ -17,6 +17,7 @@ local function OnLoad()
     -- Create a frame with custom styling
     local mainFrame =
         PriestFactionGUI:CreateFrame(
+        nil,
         "MainTrackerFrame",
         400,
         300,

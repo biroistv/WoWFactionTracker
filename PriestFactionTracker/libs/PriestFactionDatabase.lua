@@ -13,12 +13,8 @@ PriestFactionDatabase.factionExpansion = {}
 -- Function to add faction data to all tables
 local function AddFaction(faction)
     -- Validate inputs
-    if PriestFactionDatabase.factionsByID[faction.ID] then
-        error("Duplicate faction ID: " .. faction.ID)
-    end
-    if PriestFactionDatabase.factionsByName[faction.Name] then
-        error("Duplicate faction Name: " .. faction.Name)
-    end
+    assert(not PriestFactionDatabase.factionsByID[faction.ID], "Duplicate faction ID: " .. faction.ID)
+    assert(not PriestFactionDatabase.factionsByName[faction.Name], "Duplicate faction Name: " .. faction.Name)
 
     -- Add to factionsByID
     PriestFactionDatabase.factionsByID[faction.ID] = faction
@@ -143,7 +139,6 @@ AddFaction({ID = 1156, Name = "The Ashen Verdict", ParentFactionID = 1097, Expan
 AddFaction({ID = 1158, Name = "Guardians of Hyjal", ParentFactionID = 1162, Expansion = "Cataclysm"})
 AddFaction({ID = 1162, Name = "Cataclysm", ParentFactionID = 0, Expansion = "Cataclysm"})
 AddFaction({ID = 1168, Name = "Guild", ParentFactionID = 1169, Expansion = "Cataclysm"})
-AddFaction({ID = 1169, Name = "Guild", ParentFactionID = 0, Expansion = "Cataclysm"})
 AddFaction({ID = 1171, Name = "Therazane", ParentFactionID = 1162, Expansion = "Cataclysm"})
 AddFaction({ID = 1172, Name = "Dragonmaw Clan", ParentFactionID = 1162, Expansion = "Cataclysm"})
 AddFaction({ID = 1173, Name = "Ramkahen", ParentFactionID = 1162, Expansion = "Cataclysm"})
@@ -456,13 +451,7 @@ end
 
 -- Function to get all factions in a given expansion
 function PriestFactionDatabase:GetFactionsByExpansion(expansion)
-    local factions = {}
-    for _, faction in pairs(self.factionsByID) do
-        if faction.Expansion == expansion then
-            table.insert(factions, faction)
-        end
-    end
-    return factions
+    return self.factionExpansion[expansion] or {}
 end
 
 return PriestFactionDatabase
