@@ -553,6 +553,7 @@ function PriestFactionGUI:CreateCollapsibleFrame(
             12
         )
         frame.collapseButton:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -10, -10)
+        frame.collapseButton:Show()
     end
 
     -- Create a content frame

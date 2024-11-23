@@ -6,6 +6,7 @@ local PriestFactionTrackerSettingsGUI = WoWFactionTracker.PRST_FactionTrackerSet
 local PriestFactionGUI = WoWFactionTracker.PRST_FactionGUI
 local PriestFactionDatabase = WoWFactionTracker.PRST_PriestFactionDatabase
 local PriestFactionTrackerSavedVariableHandler = WoWFactionTracker.PRST_FactionTrackerSavedVariableHandler
+local PriestFactionLogger = WoWFactionTracker.PRST_Logger
 
 -- Define settings sections with collapsible headers and their respective options
 local settingsSections = {
@@ -14,8 +15,20 @@ local settingsSections = {
         options = {"Settings Frame", "Tracker Frame"}
     },
     {
-        header = "Faction Tracker",
-        options = {"Faction", "Bars"}
+        header = "Factions",
+        options = {
+            "Classic",
+            "The Burning Crusade",
+            "Wrath of the Lich King",
+            "Cataclysm",
+            "Mists of Pandaria",
+            "Warlords of Draenor",
+            "Legion",
+            "Battle for Azeroth",
+            "Shadowlands",
+            "Dragonflight",
+            "The War Within"
+        }
     },
     {
         header = "System",
@@ -25,6 +38,7 @@ local settingsSections = {
 
 -- Reference to the cyan frame
 local cyanFrame = nil
+local activeOptionsFrame = nil
 local currentOptions = ""
 
 -- Function to create the cyan frame (if not already created)
@@ -50,24 +64,41 @@ end
 local function ClearCyanFrame()
     print("----------------------ClearCyanFrame()----------------------")
 
-    if cyanFrame then
-        -- Clear FontString regions
-        print("Clearing FontString regions")
-
-        for _, region in ipairs({cyanFrame:GetRegions()}) do
-            if region:GetObjectType() == "FontString" then
-                PriestFactionGUI:ReleaseLabel(region) -- Release the FontString
-            end
-        end
-
-        print("Clearing children")
-        -- Clear child frames (if any)
-        for _, child in ipairs({cyanFrame:GetChildren()}) do
-            if child:GetObjectType() == "Frame" then
-                PriestFactionGUI:ReleaseFrame(child)
-            end
-        end
+    if activeOptionsFrame then
+        PriestFactionGUI:ReleaseElement(activeOptionsFrame)
+        activeOptionsFrame = nil
     end
+end
+
+local function CreateFactionsOptionsFrame(parent, strPanelName)
+    -- Example: Add content for the System section
+    local clasicClosableFrame, classicClosableContent =
+        PriestFactionGUI:CreateCollapsibleFrame(
+        parent,
+        strPanelName,
+        parent:GetWidth() - 20,
+        parent:GetHeight() - 20,
+        strPanelName .. "Reputations",
+        false,
+        false,
+        "Interface\\Buttons\\WHITE8X8",
+        "Interface\\Buttons\\WHITE8X8",
+        {r = 1, g = 1, b = 1, a = 0},
+        {r = 1, g = 1, b = 1, a = 0.6},
+        14,
+        14,
+        2
+    )
+    activeOptionsFrame = clasicClosableFrame
+
+    local tblClassicFactions = PriestFactionDatabase:GetFactionsByExpansion(strPanelName)
+    local startY = -10
+    for _, faction in ipairs(tblClassicFactions) do
+        PriestFactionGUI:CreateLabel(classicClosableContent, faction.Name, 10, 10, startY)
+        startY = startY - 10
+    end
+
+    currentOptions = contentType
 end
 
 -- Function to load specific content into the cyan frame
@@ -83,41 +114,35 @@ local function LoadCyanContent(contentType)
         local label = PriestFactionGUI:CreateLabel(cyanFrame, "Settings Frame", 16, 10, -10)
         label:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
         currentOptions = contentType
+        activeOptionsFrame = nil
     elseif contentType == "Tracker Frame" then
         -- Example: Add content for the Faction Tracker section
         local label = PriestFactionGUI:CreateLabel(cyanFrame, "Faction Tracker Settings", 16, 10, -10)
         label:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
         currentOptions = contentType
-    elseif contentType == "Faction" then
-        print("Creating Factions content")
-
-        -- Example: Add content for the System section
-        local clasicClosableFrame, classicClosableContent =
-            PriestFactionGUI:CreateCollapsibleFrame(
-            cyanFrame,
-            "Classic",
-            cyanFrame:GetWidth() - 20,
-            cyanFrame:GetHeight() - 20,
-            "Classic Reputations",
-            false,
-            false,
-            "Interface\\Buttons\\WHITE8X8",
-            "Interface\\Buttons\\WHITE8X8",
-            {r = 1, g = 1, b = 1, a = 0},
-            {r = 1, g = 1, b = 1, a = 0.6},
-            14,
-            14,
-            2
-        )
-
-        local tblClassicFactions = PriestFactionDatabase:GetFactionsByExpansion("Classic")
-        local startY = -10
-        for _, faction in ipairs(tblClassicFactions) do
-            PriestFactionGUI:CreateLabel(classicClosableContent, faction.Name, 10, 10, startY)
-            startY = startY - 10
-        end
-
-        currentOptions = contentType
+        activeOptionsFrame = nil
+    elseif contentType == "Classic" then
+        CreateFactionsOptionsFrame(cyanFrame, contentType)
+    elseif contentType == "The Burning Crusade" then
+        CreateFactionsOptionsFrame(cyanFrame, contentType)
+    elseif contentType == "Wrath of the Lich King" then
+        CreateFactionsOptionsFrame(cyanFrame, contentType)
+    elseif contentType == "Cataclysm" then
+        CreateFactionsOptionsFrame(cyanFrame, contentType)
+    elseif contentType == "Mists of Pandaria" then
+        CreateFactionsOptionsFrame(cyanFrame, contentType)
+    elseif contentType == "Warlords of Draenor" then
+        CreateFactionsOptionsFrame(cyanFrame, contentType)
+    elseif contentType == "Legion" then
+        CreateFactionsOptionsFrame(cyanFrame, contentType)
+    elseif contentType == "Battle for Azeroth" then
+        CreateFactionsOptionsFrame(cyanFrame, contentType)
+    elseif contentType == "Shadowlands" then
+        CreateFactionsOptionsFrame(cyanFrame, contentType)
+    elseif contentType == "Dragonflight" then
+        CreateFactionsOptionsFrame(cyanFrame, contentType)
+    elseif contentType == "The War Within" then
+        CreateFactionsOptionsFrame(cyanFrame, contentType)
     end
 end
 
