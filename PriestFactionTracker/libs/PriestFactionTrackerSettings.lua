@@ -228,7 +228,7 @@ local function CreateSettingsWindow()
     local settingsFrame =
         PriestFactionGUI:CreateFrame(
         nil,
-        "MainTrackerFrame",
+        "MainSettingsFrame",
         400,
         300,
         " ",
@@ -242,6 +242,17 @@ local function CreateSettingsWindow()
         2,
         2
     )
+    local savedPoint = PriestFactionTrackerSavedVariableHandler.Get("MainSettingsFramePoint")
+    if (savedPoint ~= nil) then
+        settingsFrame:SetPoint(
+            savedPoint.point,
+            UIParent,
+            savedPoint.relativePoint,
+            savedPoint.xOffset,
+            savedPoint.yOffset
+        )
+        settingsFrame:SetSize(savedPoint.width, savedPoint.height)
+    end
     settingsFrame:Hide() -- Hide the frame initially
 
     -- Create the green subframe (stretches horizontally across the top)

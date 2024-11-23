@@ -132,7 +132,7 @@ function PriestFactionGUI:CreateFrame(
 
                 -- Save the position details, storing the frame name instead of the frame object
                 PriestFactionTrackerSavedVariableHandler.Set(
-                    "MainTrackerFramePoint",
+                    name .. "Point",
                     {
                         point = point,
                         relativePoint = relativePoint,
@@ -148,7 +148,6 @@ function PriestFactionGUI:CreateFrame(
 
     -- Function to update child frame widths when resizing
     function frame.UpdateChildFrameWidths()
-        PriestFactionLogger:Info("Entering function: frame.UpdateChildFrameWidths")
         if not frame or not frame.GetWidth then
             print("Error: Parent frame does not exist or has no width.")
             return
@@ -191,21 +190,6 @@ function PriestFactionGUI:CreateFrame(
         "OnSizeChanged",
         function()
             frame.UpdateChildFrameWidths()
-
-            local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint() -- Get the frame's position details
-
-            -- Save the position details, storing the frame name instead of the frame object
-            PriestFactionTrackerSavedVariableHandler.Set(
-                "MainTrackerFramePoint",
-                {
-                    point = point,
-                    relativePoint = relativePoint,
-                    xOffset = xOffset,
-                    yOffset = yOffset,
-                    width = frame:GetWidth(),
-                    height = frame:GetHeight()
-                }
-            )
         end
     )
 
