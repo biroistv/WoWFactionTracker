@@ -18,6 +18,8 @@
         "ObjectiveTrackerFrame",
         "GetExpansionName",
         "PlayerFrame",
-        "SlashCmdList"
+        "SlashCmdList",
+        "ID",
+        "INFO"
     ]
 }

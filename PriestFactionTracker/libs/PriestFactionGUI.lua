@@ -4,6 +4,7 @@ local _, WoWFactionTracker = ...
 WoWFactionTracker.PRST_FactionGUI = {}
 local PriestFactionGUI = WoWFactionTracker.PRST_FactionGUI
 local PriestFactionTrackerSavedVariableHandler = WoWFactionTracker.PRST_FactionTrackerSavedVariableHandler
+local PriestFactionLogger = WoWFactionTracker.PRST_Logger
 
 -- Constants for GUI element types
 local UNIQUE_FRAME_ID = 0 -- Initialize a global identifier counter
@@ -59,8 +60,10 @@ function PriestFactionGUI:CreateFrame(
     titleFontSize,
     tileSize,
     borderSize)
+    PriestFactionLogger:Info("Entering function: PriestFactionGUI:CreateFrame")
     local frame = table.remove(self.pool.frames) -- Try to reuse from pool
     if not frame then
+        PriestFactionLogger:Warning("Condition might evaluate nil: if parent == nil then")
         if parent == nil then
             frame = CreateFrame("Frame", name, UIParent, "BackdropTemplate")
         else
@@ -145,6 +148,7 @@ function PriestFactionGUI:CreateFrame(
 
     -- Function to update child frame widths when resizing
     function frame.UpdateChildFrameWidths()
+        PriestFactionLogger:Info("Entering function: frame.UpdateChildFrameWidths")
         if not frame or not frame.GetWidth then
             print("Error: Parent frame does not exist or has no width.")
             return
@@ -167,6 +171,7 @@ function PriestFactionGUI:CreateFrame(
 
     -- Function to reorganize child frames vertically with padding
     function frame.ReorganizeChildFrames(verticalPadding)
+        PriestFactionLogger:Info("Entering function: frame.ReorganizeChildFrames")
         verticalPadding = verticalPadding or 5
         local childFrames = frame.childFrames or {}
 
@@ -204,6 +209,7 @@ function PriestFactionGUI:CreateFrame(
         end
     )
 
+    PriestFactionLogger:Info("Returning from function with value: frame")
     return frame
 end
 
@@ -218,6 +224,7 @@ end
 -- @param fontSize The font size of the button text
 -- @return The created or reused button
 function PriestFactionGUI:CreateButton(parent, label, width, height, onClick, bgColor, textColor, fontSize)
+    PriestFactionLogger:Info("Entering function: PriestFactionGUI:CreateButton")
     local button = table.remove(self.pool.buttons) -- Reuse from pool if available
     if not button then
         button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
@@ -239,6 +246,7 @@ function PriestFactionGUI:CreateButton(parent, label, width, height, onClick, bg
     fontString:SetFont("Fonts\\FRIZQT__.TTF", fontSize or 12)
     fontString:SetTextColor(textColor.r or 1, textColor.g or 1, textColor.b or 1, textColor.a or 1)
 
+    PriestFactionLogger:Info("Returning from function with value: button")
     return button
 end
 
@@ -253,6 +261,7 @@ end
 -- @param fontSize The size of the font
 -- @return The created button
 function PriestFactionGUI:CreateStylizedButton(parent, width, height, text, bgColor, borderColor, fontPath, fontSize)
+    PriestFactionLogger:Info("Entering function: PriestFactionGUI:CreateStylizedButton")
     -- Create or reuse a button from the pool
     local button = table.remove(self.pool.buttons) or CreateFrame("Button", nil, parent, "BackdropTemplate")
 
@@ -321,6 +330,7 @@ function PriestFactionGUI:CreateStylizedButton(parent, width, height, text, bgCo
 
     -- Show the button and return it
     button:Show()
+    PriestFactionLogger:Info("Returning from function with value: button")
     return button
 end
 
@@ -351,6 +361,7 @@ function PriestFactionGUI:AddFrame(
     titleFontSize,
     tileSize,
     borderSize)
+    PriestFactionLogger:Info("Entering function: PriestFactionGUI:AddFrame")
     -- Validate required inputs
     if not parent or not name then
         error("Invalid arguments: 'parent' and 'name' are required.")
@@ -389,6 +400,7 @@ function PriestFactionGUI:AddFrame(
     frame.title:SetText(title or "Untitled Sub-Frame")
     frame.title:SetFont("Fonts\\FRIZQT__.TTF", titleFontSize or 12)
 
+    PriestFactionLogger:Info("Returning from function with value: frame")
     return frame
 end
 
@@ -400,6 +412,7 @@ end
 -- @param posY Y-offset position
 -- @return The created or reused label
 function PriestFactionGUI:CreateLabel(parent, text, fontSize, posX, posY)
+    PriestFactionLogger:Info("Entering function: PriestFactionGUI:CreateLabel")
     print("----------------------CreateLabel()----------------------")
 
     print("Label Pool Size:", #self.pool.labels)
@@ -428,6 +441,7 @@ function PriestFactionGUI:CreateLabel(parent, text, fontSize, posX, posY)
     print("Label Text:", label:GetText())
     print("----------------------CreateLabel() Done----------------------")
 
+    PriestFactionLogger:Info("Returning from function with value: label")
     return label
 end
 
@@ -439,6 +453,7 @@ end
 -- @param fillColor Table with RGBA values for fill color
 -- @return The created or reused progress bar
 function PriestFactionGUI:CreateProgressBar(parent, width, height, bgColor, fillColor)
+    PriestFactionLogger:Info("Entering function: PriestFactionGUI:CreateProgressBar")
     -- Create the outer frame to act as the border container
     local outerFrame = table.remove(self.pool.progressBars) -- Try to reuse from pool
     if not outerFrame then
@@ -478,10 +493,12 @@ function PriestFactionGUI:CreateProgressBar(parent, width, height, bgColor, fill
 
     -- Adding update function for setting progress on the outer frame, operating on the inner progress bar
     function outerFrame:SetProgress(value)
+        PriestFactionLogger:Info("Entering function: outerFrame:SetProgress")
         value = math.min(math.max(value, 0), 100) -- Clamp value between 0 and 100
         progressBar:SetValue(value)
     end
 
+    PriestFactionLogger:Info("Returning from function with value: outerFrame")
     return outerFrame
 end
 
@@ -514,6 +531,7 @@ function PriestFactionGUI:CreateCollapsibleFrame(
     titleFontSize,
     tileSize,
     borderSize)
+    PriestFactionLogger:Info("Entering function: PriestFactionGUI:CreateCollapsibleFrame")
     -- Create the main frame using the existing CreateFrame function
     local frame =
         self:CreateFrame(
@@ -631,6 +649,7 @@ function PriestFactionGUI:CreateCollapsibleFrame(
     frame.childFrames = frame.childFrames or {}
 
     -- Return both the main frame and the content frame for further customization
+    PriestFactionLogger:Info("Returning from function with value: frame, frame.contentFrame")
     return frame, frame.contentFrame
 end
 
@@ -642,6 +661,7 @@ end
 --- @param maxProgress Integer maximum progress value
 --- @return The created or reused faction progress frame
 function PriestFactionGUI:CreateFactionProgressFrame(parent, iconPath, factionName, progress, maxProgress)
+    PriestFactionLogger:Info("Entering function: PriestFactionGUI:CreateFactionProgressFrame")
     -- Initialize the childFrames table if it doesn't exist
     if not parent.childFrames then
         parent.childFrames = {}
@@ -722,6 +742,7 @@ function PriestFactionGUI:CreateFactionProgressFrame(parent, iconPath, factionNa
 
     -- Update function for progress values
     function frame:SetProgress(current, maximum)
+        PriestFactionLogger:Info("Entering function: frame:SetProgress")
         progressBar:SetProgress(math.floor((current / maximum) * 100))
         statusText:SetText(string.format("%d/%d", current, maximum))
     end
@@ -730,6 +751,7 @@ function PriestFactionGUI:CreateFactionProgressFrame(parent, iconPath, factionNa
     parent.childFrames = parent.childFrames or {}
     table.insert(parent.childFrames, frame)
 
+    PriestFactionLogger:Info("Returning from function with value: frame")
     return frame
 end
 
@@ -737,6 +759,7 @@ end
 -- @param parent Frame The parent frame
 -- @param frameId String The unique identifier of the frame to be removed
 function PriestFactionGUI:RemoveFactionProgressFrame(parent, frameId)
+    PriestFactionLogger:Info("Entering function: PriestFactionGUI:RemoveFactionProgressFrame")
     local childFrames = parent.childFrames or {}
     local indexToRemove = nil
 
@@ -765,6 +788,7 @@ end
 
 -- Method to release a frame back to the pool
 function PriestFactionGUI:ReleaseFrame(frame)
+    PriestFactionLogger:Info("Entering function: PriestFactionGUI:ReleaseFrame")
     print("----------------------ReleaseFrame()----------------------")
     frame:Hide()
     frame:ClearAllPoints()
@@ -774,6 +798,7 @@ end
 
 -- Method to release a button back to the pool
 function PriestFactionGUI:ReleaseButton(button)
+    PriestFactionLogger:Info("Entering function: PriestFactionGUI:ReleaseButton")
     button:Hide()
     button:SetScript("OnClick", nil)
     table.insert(self.pool.buttons, button)
@@ -781,6 +806,7 @@ end
 
 -- Method to release a label back to the pool
 function PriestFactionGUI:ReleaseLabel(label)
+    PriestFactionLogger:Info("Entering function: PriestFactionGUI:ReleaseLabel")
     print("----------------------ReleaseLabel()----------------------")
 
     -- Reset the label's state
@@ -799,6 +825,7 @@ end
 
 -- Method to release a progress bar back to the pool
 function PriestFactionGUI:ReleaseProgressBar(progressBar)
+    PriestFactionLogger:Info("Entering function: PriestFactionGUI:ReleaseProgressBar")
     progressBar:Hide()
     progressBar:SetValue(0) -- Reset to 0
     table.insert(self.pool.progressBars, progressBar)
@@ -806,6 +833,7 @@ end
 
 -- Generalized method to release any GUI element back to its pool
 function PriestFactionGUI:ReleaseElement(element)
+    PriestFactionLogger:Info("Entering function: PriestFactionGUI:ReleaseElement")
     print("----------------------ReleaseElement()----------------------")
 
     -- Identify the type of element and delegate to the appropriate release function
